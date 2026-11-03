@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aadhaar Seva Kendra (MP) Navigator</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for crisp UI icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- QRCode.js for in-page QR sharing generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- Header Banner -->
+  <header class="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white shadow-lg sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto px-4 py-4 sm:py-5 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-xl shadow-inner">
+          <i class="fa-solid fa-id-card text-amber-300"></i>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight">MP Aadhaar Seva Kendra</h1>
+          <p class="text-xs text-blue-100 flex items-center gap-1.5 font-medium">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            19 Center Locations • Direct Google Maps
+          </p>
+        </div>
+      </div>
+      <button onclick="openQRModal()" class="flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/25 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition active:scale-95 cursor-pointer">
+        <i class="fa-solid fa-qrcode text-base"></i>
+        <span class="hidden sm:inline">QR Code Dekhein</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-4xl mx-auto px-4 py-6 sm:py-8">
+
+    <!-- Hero / Info Box -->
+    <div class="bg-white rounded-2xl p-5 mb-6 border border-slate-200/80 shadow-sm relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none text-9xl">
+        <i class="fa-solid fa-location-dot"></i>
+      </div>
+      <div class="relative z-10">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <i class="fa-solid fa-map-location-dot text-blue-600"></i>
+          Apna Najdeeki Aadhaar Kendra Chunein
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          Neeche diye gaye kendra ke samne 
+          <span class="font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">Google Maps par rasta dekhein</span> 
+          button par tap karke seedha rasta navigate karein.
+        </p>
+      </div>
+    </div>
+
+    <!-- Sticky Search & Quick Filter Bar -->
+    <div class="sticky top-20 z-20 mb-6 bg-slate-50/95 backdrop-blur-md pt-1 pb-2">
+      <!-- Search Input -->
+      <div class="relative shadow-sm rounded-2xl">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+          <i class="fa-solid fa-magnifying-glass text-base"></i>
+        </div>
+        <input 
+          type="text" 
+          id="searchInput"
+          placeholder="Shahar ya Kendra ka naam khojein (e.g. Bhopal, Indore, Ujjain)..." 
+          class="w-full pl-11 pr-11 py-3.5 bg-white border border-slate-300 rounded-2xl text-slate-800 placeholder-slate-400 text-sm sm:text-base focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 outline-none transition"
+          oninput="handleSearch()"
+        />
+        <button 
+          id="clearBtn"
+          onclick="clearSearch()"
+          class="hidden absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition"
+          title="Clear search"
+        >
+          <i class="fa-solid fa-circle-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Quick Filter Tags -->
+      <div class="flex items-center gap-2 mt-3 overflow-x-auto pb-1 no-scrollbar text-xs font-semibold">
+        <span class="text-slate-500 flex items-center gap-1 pl-1 whitespace-nowrap">
+          <i class="fa-solid fa-filter"></i> Top Cities:
+        </span>
+        <button onclick="setQuery('Indore')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 shadow-xs transition whitespace-nowrap">Indore</button>
+        <button onclick="setQuery('Bhopal')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 shadow-xs transition whitespace-nowrap">Bhopal</button>
+        <button onclick="setQuery('Jabalpur')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 shadow-xs transition whitespace-nowrap">Jabalpur</button>
+        <button onclick="setQuery('Ujjain')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 shadow-xs transition whitespace-nowrap">Ujjain</button>
+        <button onclick="setQuery('Gwalior/Bhind')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 shadow-xs transition whitespace-nowrap">Bhind</button>
+        <button onclick="setQuery('Rewa')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 shadow-xs transition whitespace-nowrap">Rewa</button>
+      </div>
+    </div>
+
+    <!-- Results Counter -->
+    <div class="flex items-center justify-between text-xs sm:text-sm text-slate-500 px-1 mb-3">
+      <span>Available Centers: <strong id="centerCount" class="text-slate-800">19</strong></span>
+      <span class="text-slate-400">Total verified: 19 MP Centers</span>
+    </div>
+
+    <!-- Center Cards Grid -->
+    <div id="centersGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <!-- Generated via JS for clean search and dynamic filtering -->
+    </div>
+
+    <!-- No Match Alert -->
+    <div id="noMatchCard" class="hidden text-center py-12 px-4 bg-white rounded-2xl border border-dashed border-slate-300">
+      <div class="w-14 h-14 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl mb-3">
+        <i class="fa-solid fa-map-pin"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-800 mb-1">Koyi Kendra Nahi Mila</h3>
+      <p class="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto mb-4">
+        Aapne jo shahar ya naam type kiya hai, kripya spelling check karein ya 'All' par tap karein.
+      </p>
+      <button onclick="clearSearch()" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 transition">
+        Saari List Dekhein
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Share & QR Modal -->
+  <div id="qrModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+      <button onclick="closeQRModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-3">
+        <i class="fa-solid fa-qrcode"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 mb-1">Scan & Share Directory</h3>
+      <p class="text-xs text-slate-500 mb-5">
+        Kisi bhi mobile camera se scan karke ye pura page khola ja sakta hai.
+      </p>
+
+      <!-- Dynamic QR Code Container -->
+      <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-center mb-4 shadow-inner">
+        <div id="qrcodeCanvas"></div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="copyCurrentURL()" id="copyBtn" class="flex-1 py-2.5 px-3 bg-blue-600 text-white text-xs font-semibold rounded-xl hover:bg-blue-700 transition flex items-center justify-center gap-2">
+          <i class="fa-regular fa-copy"></i>
+          <span>Page Link Copy Karein</span>
+        </button>
+        <button onclick="closeQRModal()" class="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
+          Band Karein
+        </button>
+      </div>
+      <p id="copyAlert" class="text-xs text-emerald-600 font-medium mt-2 hidden">Link clipboard par copy ho gaya!</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-12 border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
+    <p>Aadhaar Seva Kendra Madhya Pradesh Directory • Google Maps Verified Navigation</p>
+  </footer>
+
+  <script>
+    // List of 19 centers extracted exactly from sheet
+    const askData = [
+      { id: 1, name: "ASK Ujjain", city: "Ujjain", url: "https://maps.app.goo.gl/Bz84zNqyTs6zv7ve6" },
+      { id: 2, name: "ASK indore", city: "Indore", url: "https://maps.app.goo.gl/GhQ4i6hTDDZ73vnm7" },
+      { id: 3, name: "ASK Jhabua", city: "Jhabua", url: "https://maps.app.goo.gl/x1NghLmSAzwdvkAJ8" },
+      { id: 4, name: "ASK Jabalpur", city: "Jabalpur", url: "https://maps.app.goo.gl/TodvFDV7TiiDRFAy9" },
+      { id: 5, name: "ASK Betul", city: "Betul", url: "https://www.google.com/maps/search/?api=1&query=Aadhaar+centre+BADORA+BETUL" },
+      { id: 6, name: "ASK Raisen", city: "Raisen", url: "https://maps.app.goo.gl/nkZV6YzknhwWqUCfA" },
+      { id: 7, name: "ASK Tikamgarh", city: "Tikamgarh", url: "https://maps.app.goo.gl/rDJzFFqSMS3qo7sH7" },
+      { id: 8, name: "ASK Bhopal", city: "Bhopal", url: "https://maps.app.goo.gl/fcttN8roqLvkQsYv6" },
+      { id: 9, name: "ASK Bhind", city: "Bhind", url: "https://maps.app.goo.gl/MUk2VyUhqkHy41UBA?g_st=aw" },
+      { id: 10, name: "ASK Chhindwara", city: "Chhindwara", url: "https://maps.app.goo.gl/MBATCUibi6NLuNaV7" },
+      { id: 11, name: "ASK Rewa", city: "Rewa", url: "https://www.google.co.in/maps/@24.5438384,81.3334199,16z?" },
+      { id: 12, name: "ASK Satna", city: "Satna", url: "https://www.google.com/maps/dir/Satna,+Madhya+Pradesh/24.5736091,80.8385951/@24.5734037,80.8379296,19.63z/data=!4m9!4m8!1m5!1m1!1s0x39847f12a0d55141:0xa6208334386e35e2!2m2!1d80.8462023!2d24.57141!1m1!4e1?entry=ttu" },
+      { id: 13, name: "ASK Chhatarpur", city: "Chhatarpur", url: "https://goo.gl/maps/UNLv53rwcAuRnSKK6" },
+      { id: 14, name: "ASK Vidisha", city: "Vidisha", url: "https://maps.app.goo.gl/nYhLmKLosXNgKEAg7" },
+      { id: 15, name: "ASK Barwani", city: "Barwani", url: "https://www.google.com/maps/place/Sai+Enterprises/@22.0302743,74.9145108,76m/data=!3m1!1e3!4m18!1m11!4m10!1m4!2m2!1d74.9154091!2d22.0303676!4e1!1m4!2m2!1d74.9154306!2d22.0303775!4e1!3m5!1s0x3961f921f56362a3:0xbbb3f2007f553b80!8m2!3d22.030277!4d74.915054!16s%2Fg%2F11l2vrp936?entry=ttu" },
+      { id: 16, name: "ASK Sidhi", city: "Sidhi", url: "https://maps.app.goo.gl/N6NGvdoaT9McPJGE8" },
+      { id: 17, name: "ASK Mandla", city: "Mandla", url: "https://www.google.com/maps/@22.6224925,80.3676979,20.79z?entry=ttu" },
+      { id: 18, name: "ASk Shahdol", city: "Shahdol", url: "https://maps.app.goo.gl/eDaHtU2c4jwZwjYT8" },
+      { id: 19, name: "ASK Shivpuri", city: "Shivpuri", url: "https://share.google/yZYd6hJfhMYV1vRNT" }
+    ];
+
+    const grid = document.getElementById('centersGrid');
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearBtn');
+    const noMatchCard = document.getElementById('noMatchCard');
+    const countDisplay = document.getElementById('centerCount');
+
+    // Render list
+    function renderCenters(data) {
+      grid.innerHTML = '';
+      if (!data || data.length === 0) {
+        noMatchCard.classList.remove('hidden');
+        countDisplay.textContent = '0';
+        return;
+      }
+
+      noMatchCard.classList.add('hidden');
+      countDisplay.textContent = data.length;
+
+      data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md hover:border-blue-400 transition flex flex-col justify-between gap-3 group";
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center border border-blue-100 flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition">
+                #${item.id}
+              </span>
+              <div>
+                <h3 class="text-base font-bold text-slate-800 capitalize leading-snug">${item.name}</h3>
+                <span class="inline-flex items-center gap-1 text-xs text-slate-500 font-medium mt-0.5">
+                  <i class="fa-solid fa-location-dot text-rose-500 text-[10px]"></i> Madhya Pradesh
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+            <span class="text-xs text-slate-400 font-medium truncate max-w-[150px] sm:max-w-[200px]">
+              Tap to navigate
+            </span>
+            <a 
+              href="${item.url}" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-xs transition"
+            >
+              <i class="fa-solid fa-diamond-turn-right text-amber-300"></i>
+              <span>Google Maps par rasta dekhein</span>
+            </a>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Filter Logic
+    function handleSearch() {
+      const q = searchInput.value.toLowerCase().trim();
+      clearBtn.classList.toggle('hidden', q.length === 0);
+
+      const filtered = askData.filter(c => 
+        c.name.toLowerCase().includes(q) || 
+        c.city.toLowerCase().includes(q)
+      );
+      renderCenters(filtered);
+    }
+
+    function clearSearch() {
+      searchInput.value = '';
+      clearBtn.classList.add('hidden');
+      renderCenters(askData);
+      searchInput.focus();
+    }
+
+    function setQuery(city) {
+      searchInput.value = city;
+      handleSearch();
+    }
+
+    // Modal & QR Generator
+    let qrGenerated = false;
+    function openQRModal() {
+      document.getElementById('qrModal').classList.remove('hidden');
+      if (!qrGenerated) {
+        const qrContainer = document.getElementById('qrcodeCanvas');
+        qrContainer.innerHTML = '';
+        new QRCode(qrContainer, {
+          text: window.location.href || "https://google.com",
+          width: 180,
+          height: 180,
+          colorDark: "#0f172a",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        qrGenerated = true;
+      }
+    }
+
+    function closeQRModal() {
+      document.getElementById('qrModal').classList.add('hidden');
+    }
+
+    function copyCurrentURL() {
+      const url = window.location.href;
+      const tempInput = document.createElement("input");
+      tempInput.value = url;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+
+      const alertMsg = document.getElementById('copyAlert');
+      alertMsg.classList.remove('hidden');
+      setTimeout(() => alertMsg.classList.add('hidden'), 2500);
+    }
+
+    // Initial load
+    window.onload = function() {
+      renderCenters(askData);
+    };
+  </script>
+</body>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aadhaar Seva Kendra (MP) Navigator</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for crisp UI icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- QRCode.js for in-page QR sharing generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- Header Banner -->
+  <header class="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white shadow-lg sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto px-4 py-4 sm:py-5 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-xl shadow-inner">
+          <i class="fa-solid fa-id-card text-amber-300"></i>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight">MP Aadhaar Seva Kendra</h1>
+          <p class="text-xs text-blue-100 flex items-center gap-1.5 font-medium">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            19 Center Locations • Direct Google Maps
+          </p>
+        </div>
+      </div>
+      <button onclick="openQRModal()" class="flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/25 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition active:scale-95 cursor-pointer">
+        <i class="fa-solid fa-qrcode text-base"></i>
+        <span class="hidden sm:inline">QR Code Dekhein</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-4xl mx-auto px-4 py-6 sm:py-8">
+
+    <!-- Hero / Info Box -->
+    <div class="bg-white rounded-2xl p-5 mb-6 border border-slate-200/80 shadow-sm relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none text-9xl">
+        <i class="fa-solid fa-location-dot"></i>
+      </div>
+      <div class="relative z-10">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <i class="fa-solid fa-map-location-dot text-blue-600"></i>
+          Apna Najdeeki Aadhaar Kendra Chunein
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          Neeche diye gaye kendra ke samne 
+          <span class="font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">Google Maps par rasta dekhein</span> 
+          button par tap karke seedha rasta navigate karein.
+        </p>
+      </div>
+    </div>
+
+    <!-- Sticky Search & Quick Filter Bar -->
+    <div class="sticky top-20 z-20 mb-6 bg-slate-50/95 backdrop-blur-md pt-1 pb-2">
+      <!-- Search Input -->
+      <div class="relative shadow-sm rounded-2xl">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+          <i class="fa-solid fa-magnifying-glass text-base"></i>
+        </div>
+        <input 
+          type="text" 
+          id="searchInput"
+          placeholder="Shahar ya Kendra ka naam khojein (e.g. Bhopal, Indore, Ujjain)..." 
+          class="w-full pl-11 pr-11 py-3.5 bg-white border border-slate-300 rounded-2xl text-slate-800 placeholder-slate-400 text-sm sm:
